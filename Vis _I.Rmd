@@ -1,0 +1,83 @@
+---
+title: "Vis_I"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(ggridges)
+```
+
+import the weather data:
+
+```{r weather}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = case_match(
+      id, 
+      "USW00094728" ~ "CentralPark_NY", 
+      "USW00022534" ~ "Molokai_HI",
+      "USS0023B17S" ~ "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) |>
+  select(name, id, everything())
+```
+
+Making our first plot :-)
+
+```{r}
+ggplot(weather_df, aes(x=tmin, y=tmax)) +
+  geom_point()
+```
+
+another way:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax)) +
+  geom_point()
+```
+
+
+```{r}
+ggp_weather_scatterplot=
+  weather_df |>
+   ggplot(aes(x=tmin, y=tmax)) +
+  geom_point()
+
+ggp_weather_scatterplot
+```
+
+
+check why some rows are missing.
+
+```{r}
+
+```
+
+# Fancier scatter plots:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha = 0.3, size = 0.8)+
+  geom_smooth(se= FALSE)
+
+# alpha makes the points a little more transparent, size is to make it smaller. Geom smooth gives you a smooth curve that fits through the data points.
+```
+
+where you define aesthetics can matter:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax)) +
+  geom_point(aes(color=name),alpha = 0.3, size = 0.8)+
+  geom_smooth(se= FALSE)
+
+# moving the color statement to the next line, it will only show one smooth curve
+```
