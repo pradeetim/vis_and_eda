@@ -1,0 +1,193 @@
+---
+title: "Vis_I"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(ggridges)
+```
+
+import the weather data:
+
+```{r weather}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = case_match(
+      id, 
+      "USW00094728" ~ "CentralPark_NY", 
+      "USW00022534" ~ "Molokai_HI",
+      "USS0023B17S" ~ "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) |>
+  select(name, id, everything())
+```
+
+
+Making our first plot :-)
+
+```{r}
+ggplot(weather_df, aes(x=tmin, y=tmax)) +
+  geom_point()
+```
+
+another way:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax)) +
+  geom_point()
+```
+
+
+```{r}
+ggp_weather_scatterplot=
+  weather_df |>
+   ggplot(aes(x=tmin, y=tmax)) +
+  geom_point()
+
+ggp_weather_scatterplot
+```
+
+
+check why some rows are missing.
+
+```{r}
+
+```
+
+# Fancier scatter plots:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha = 0.3, size = 0.8)+
+  geom_smooth(se= FALSE)
+
+# alpha makes the points a little more transparent, size is to make it smaller. Geom smooth gives you a smooth curve that fits through the data points.
+```
+
+where you define aesthetics can matter:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax)) +
+  geom_point(aes(color=name),alpha = 0.3, size = 0.8)+
+  geom_smooth(se= FALSE)
+
+# moving the color statement to the next line, it will only show one smooth curve
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=tmax, color=name))+
+  geom_point(alpha=0.3)+
+  geom_smooth(se=FALSE)+
+  facet_grid(. ~ name)
+
+#facet grid, rows ~ column
+```
+
+lets make a somewhat more interesting scatterplot
+
+```{r}
+weather_df |>
+  ggplot(aes(x=date, y=tmax, color=name, size=prcp)) +
+  geom_point(alpha=.3) +
+  geom_smooth(se=FALSE) +
+  facet_grid(. ~ name)
+
+```
+
+Learning assesment:
+```{r}
+weather_df |> 
+  filter(name == "CentralPark_NY") |> 
+  mutate(
+    tmax_fahr = tmax * (9 / 5) + 32,
+    tmin_fahr = tmin * (9 / 5) + 32) |> 
+  ggplot(aes(x = tmin_fahr, y = tmax_fahr)) +
+  geom_point(alpha = .5) + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_smooth(se = FALSE) 
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmax, y = tmin)) + 
+  geom_hex()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmax, y = tmin))+
+  geom_point(color = "blue")
+
+# the color needs to be in quotes. if its a variable or df then no need for quotes
+```
+
+histogram: 
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin))+
+  geom_histogram()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, fill = name))+
+  geom_histogram(postition = "dodge")
+```
+
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, fill=name))+
+  geom_histogram()+
+  facet_grid(. ~ name)
+```
+
+maybe a density plot?
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, fill=name))+
+  geom_density(alpha=.3)
+```
+
+box plots:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=name, y=tmin, fill = name))+
+  geom_boxplot()
+```
+
+violin plots:
+
+```{r}
+weather_df |>
+  ggplot(aes(x=name, y=tmin, fill = name))+
+  geom_violin()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x=tmin, y=name))+
+  geom_density_ridges()
+```
+
+LA univariates plots
+```{r}
+ggplot(weather_df, aes(x = prcp)) +   geom_density(aes(fill = name), alpha = .5) 
+```
+
