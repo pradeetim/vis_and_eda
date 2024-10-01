@@ -244,6 +244,43 @@ pulse_df |>
 ```
 
 
+Make an FAS plot:
+
+```{r pups}
+
+litter_df = 
+  read_csv("./data/FAS_litters.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  separate(group, into = c("dose", "tx_day"), sep = 3)
+
+pups_df = 
+  read_csv("./data/FAS_pups.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+# re-coding sex not needed.
+  mutate(
+    sex = 
+      case_match(
+        sex, 
+        1 ~ "male", 
+        2 ~ "female")) |>
+  pivot_longer(
+    pd_ears:pd_walk,
+    names_to = "outcome", 
+    values_to = "pn_day",
+    names_prefix = "pd_") 
+
+
+
+fas_df = left_join(pups_df, litter_df, by = "litter_number") 
+
+fas_df |> 
+  drop_na(tx_day) |>
+  ggplot(aes(x = dose, y = pn_day)) +
+  geom_boxplot() +
+  facet_grid(tx_day ~ outcome)
+```
+
+
 
 
 

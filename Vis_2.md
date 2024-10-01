@@ -318,3 +318,47 @@ ggp_tmax_date =
 ![](Vis_2_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ## Data manipulation
+
+``` r
+weather_df |>
+  mutate(name=fct_relevel(name, c("Molokai_HI", "CentralPark_NY", "Waterhole_WA"))) |>
+  ggplot(aes(x=name, y=tmax, fill=name)) +
+  geom_violin(alpha=.5)
+```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `name = fct_relevel(name, c("Molokai_HI", "CentralPark_NY",
+    ##   "Waterhole_WA"))`.
+    ## Caused by warning:
+    ## ! 1 unknown level in `f`: CentralPark_NY
+
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
+    ## (`stat_ydensity()`).
+
+![](Vis_2_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+Pulse data next:
+
+``` r
+pulse_df=
+  read_sas("data/public_pulse_data.sas7bdat") |>
+  janitor::clean_names() |>
+  # have to create variables before making the plot.
+  pivot_longer(
+    cols = bdi_score_bl:bdi_score_12m,
+    names_to= "visit",
+    values_to= "bdi_score",
+    names_prefix = "bdi_score_"
+  ) |>
+  mutate(visit = ifelse(visit == "bl", "00m", visit))
+# whats happening in parenthesis: take bl replace w 00m and otherwise leave alone. the box plots will now be in order of time (before numbers came before letters)
+
+pulse_df |>
+  ggplot(aes(x=visit, y=bdi_score)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 879 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](Vis_2_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
